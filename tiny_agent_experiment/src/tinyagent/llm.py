@@ -72,3 +72,24 @@ class LLM:
             tool_call=tool_calls[0] if tool_calls else None,
             metadata=metadata,
         )
+
+class EmbeddingModel:
+    """Turn text into a vector via an OpenAI-compatible /embeddings endpoint."""
+
+    def __init__(
+        self, model: str, base_url: str = "http://localhost:11434/v1"
+    ) -> None:
+        self.model = model
+        self.base_url = base_url
+
+    def embed(self, text: str) -> list[float]:
+        """Convert text into a numerical vector."""
+        request = urllib.request.Request(
+            f"{self.base_url}/embeddings",
+            data=json.dumps({"model": self.model, "input": text}).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(request) as http_response:
+            data = json.loads(http_response.read())
+        return data["data"][0]["embedding"]
+
