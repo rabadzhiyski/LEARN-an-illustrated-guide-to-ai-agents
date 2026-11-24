@@ -2,6 +2,8 @@ from .agent import TinyAgent
 from .llm import LLM, EmbeddingModel, Response
 from .memory import LongTermMemory, Memory, SummarizationMemory, TrimmingMemory
 from .trajectory import Step, Trajectory
+from .tools import NativeTools, Skills, Tools
+
 
 __all__ = [
     "TinyAgent",
@@ -14,6 +16,9 @@ __all__ = [
     "LongTermMemory",
     "Step",
     "Trajectory",
+    "NativeTools",
+    "Skills",
+    "Tools"
 ] 
 
 
