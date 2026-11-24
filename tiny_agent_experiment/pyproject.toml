@@ -9,5 +9,8 @@ description = "My TinyAgent, rebuilt chapter by chapter"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.optional-dependencies]
+mcp = ["mcp>=2.3"]
+
 [tool.setuptools.packages.find]
 where = ["src"]

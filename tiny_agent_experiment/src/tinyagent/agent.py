@@ -3,6 +3,8 @@ from .memory import Memory
 from .tools import Tools
 from .trajectory import Trajectory
 
+#  The quick test: is it "how to do X" → skill; "what is true about Y" → RAG; "always do or never do" → system prompt.
+
 
 class TinyAgent:
     """A minimal, modular, and educational agent."""
