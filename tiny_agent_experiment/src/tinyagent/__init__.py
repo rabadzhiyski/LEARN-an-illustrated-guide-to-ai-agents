@@ -3,7 +3,7 @@ from .llm import LLM, EmbeddingModel, Response
 from .memory import LongTermMemory, Memory, SummarizationMemory, TrimmingMemory
 from .trajectory import Step, Trajectory
 from .tools import NativeTools, Skills, Tools
-
+from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
 
 __all__ = [
     "TinyAgent",
@@ -18,7 +18,11 @@ __all__ = [
     "Trajectory",
     "NativeTools",
     "Skills",
-    "Tools"
+    "Tools",
+    "NativeReAct",
+    "PlanAndSolve",
+    "ReAct",
+    "Reflexion"
 ] 
 
 

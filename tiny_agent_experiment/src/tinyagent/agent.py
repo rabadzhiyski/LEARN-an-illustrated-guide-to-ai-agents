@@ -1,53 +1,75 @@
 from .llm import LLM, Response
 from .memory import Memory
+from .planning import ReAct, Reflexion
 from .tools import Tools
 from .trajectory import Trajectory
-
-#  The quick test: is it "how to do X" → skill; "what is true about Y" → RAG; "always do or never do" → system prompt.
 
 
 class TinyAgent:
     """A minimal, modular, and educational agent."""
 
-    def __init__(self, llm: LLM, memory: Memory, tools: Tools) -> None:
+    def __init__(
+        self,
+        llm: LLM,
+        memory: Memory,
+        tools: Tools,
+        planner: ReAct,
+        reflector: Reflexion | None = None,
+    ) -> None:
         self.llm = llm
-        self.memory = memory   
-        self.tools = tools    
-        self.planner = None  # Ch6
+        self.memory = memory
+        self.tools = tools
+        self.planner = planner
+        self.reflector = reflector
 
         self.trajectory = Trajectory()
 
-        # The system prompt is assembled from the components
-        system_prompt = "You're a helpful assistant.\n" + self.tools.prompt
+        # Each component contributes its own instructions
+        system_prompt = (
+            "You are a helpful assistant.\n" + self.planner.prompt + self.tools.prompt
+        )
         self.memory.add("system", system_prompt)
 
-
     def run(self, task: str) -> str:
-        """Run the agent on a task."""
+        """Run the agent on a task until it answers or runs out of steps."""
         self.memory.add("user", task)
         self.trajectory.initialize(task)
-        return self._step()
 
-    def _step(self) -> str:
-        """Perform a single step: think, then maybe act."""
+        # The autonomy loop
+        for step in range(self.planner.max_steps):
+            if self.reflector:
+                self.reflector.reflect(self.memory, step)
+            result = self._step()
+            if result is not None:
+                return result
+
+        return "Max steps reached without completion."
+
+    def _step(self) -> str | None:
+        """One iteration. Returns the answer when done, None to keep going."""
+        # THOUGHT
         response = self.llm.generate(
             self.memory.get_messages(), tools=self.tools.schemas
-            )
-        # Store the new reply (incl. native tool_calls) BEFORE parsing
+        )
         self.memory.add("assistant", response.content, tool_call=response.tool_call)
 
+        # Parse: planner first (THOUGHT/ACTION split), then tools (JSON → tool_call)
+        response = self.planner.parse(response)
         response = self.tools.parse(response)
+
+        # ANSWER
         if self.tools.is_done(response):
             self.trajectory.add(response)
             return response.content
 
-        return self._execute_action(response)
+        self._execute_action(response)
+        return None
 
-    def _execute_action(self, response: Response) -> str:
-        """ACTION: run the tool. OBSERVATION: store the result."""
+    def _execute_action(self, response: Response) -> None:
+        """ACTION + OBSERVATION."""
         result = self.tools.execute(response)
         role, observation = self.tools.observation(result)
-        self.memory.add(role, observation)
+        self.memory.add(role, observation, tool_call_id=response.tool_call.get("id"))
         self.trajectory.add(response, observation)
-        return observation
+
 

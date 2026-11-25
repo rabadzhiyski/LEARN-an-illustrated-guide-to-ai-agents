@@ -8,17 +8,27 @@ class Memory:
         self.messages: list[dict] = []
 
     def add(
-        self, role: str, content: str, tool_call: dict | None = None, **kwargs
-    ) -> None:
-        """Add a message to memory."""
-        message = {"role": role, "content": content}
-        if tool_call:
-            message["tool_calls"] = [tool_call]  # used from Ch5 on
-        self.messages.append(message)
+          self,
+          role: str,
+          content: str,
+          tool_call: dict | None = None,
+          tool_call_id: str | None = None,
+          **kwargs,
+      ) -> None:
+          """Add a message to memory."""
+          message = {"role": role, "content": content}
+          if tool_call:
+              message["tool_calls"] = [tool_call]  # assistant asks for a tool
+          if tool_call_id:
+              message["tool_call_id"] = tool_call_id  # tool result answers that call
+          self.messages.append(message)
 
     def get_messages(self) -> list[dict]:
-        """Return the messages to send to the LLM."""
-        return self.messages
+          """Return the messages to send to the LLM."""
+          return self.messages
+
+
+
 
 
 class TrimmingMemory(Memory):

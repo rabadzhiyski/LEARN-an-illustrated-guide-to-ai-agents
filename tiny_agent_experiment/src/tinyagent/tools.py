@@ -78,7 +78,7 @@ If needed, you can use the following tools:
 
 {self.descriptions}
 
-To use a tool, reply with ONLY this JSON and nothing else:
+To use a tool, write this JSON:
 {{"tool": "tool_name", "kwargs": {{"param": "value"}}}}
 """
 
@@ -151,7 +151,12 @@ class NativeTools(Tools):
         args = function["arguments"]
         if isinstance(args, str):  # OpenAI spec: arguments is a JSON *string*
             args = json.loads(args) if args else {}
-        return replace(response, tool_call={"tool": function["name"], "kwargs": args})
+        tool_call = {
+              "tool": function["name"],
+              "kwargs": args,
+              "id": response.tool_call.get("id"),
+          }
+        return replace(response, tool_call=tool_call)
 
     def observation(self, result: Any) -> tuple[str, str]:
         return "tool", str(result)
