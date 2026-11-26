@@ -4,6 +4,7 @@ from .memory import LongTermMemory, Memory, SummarizationMemory, TrimmingMemory
 from .trajectory import Step, Trajectory
 from .tools import NativeTools, Skills, Tools
 from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
+from .multi_agent import SubAgent, total_tokens
 from .evaluation import (
     Benchmark,
     Evaluator,
@@ -38,6 +39,8 @@ __all__ = [
     "make_judge",
     "programmatic",
     "used_tools",
+    "SubAgent",
+    "total_tokens"
 ] 
 
 

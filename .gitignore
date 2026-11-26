@@ -81,3 +81,6 @@ venv.bak/
 .DS_Store
 CLAUDE.md
 .claude
+
+# other
+tiny_agent_experiment/mcp_servers/notes.json
