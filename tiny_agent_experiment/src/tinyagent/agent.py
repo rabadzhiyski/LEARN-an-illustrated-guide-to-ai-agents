@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .llm import LLM, Response
 from .memory import Memory
 from .planning import ReAct, Reflexion
@@ -26,13 +28,15 @@ class TinyAgent:
 
         # Each component contributes its own instructions
         system_prompt = (
-            "You are a helpful assistant.\n" + self.planner.prompt + self.tools.prompt
+            "You are a helpful assistant.\n"
+            + self.planner.prompt
+            + self.tools.prompt
         )
         self.memory.add("system", system_prompt)
 
-    def run(self, task: str) -> str:
+    def run(self, task: str, image: str | Path | None = None) -> str:
         """Run the agent on a task until it answers or runs out of steps."""
-        self.memory.add("user", task)
+        self.memory.add("user", task, image=image)
         self.trajectory.initialize(task)
 
         # The autonomy loop
@@ -51,7 +55,9 @@ class TinyAgent:
         response = self.llm.generate(
             self.memory.get_messages(), tools=self.tools.schemas
         )
-        self.memory.add("assistant", response.content, tool_call=response.tool_call)
+        self.memory.add(
+            "assistant", response.content, tool_call=response.tool_call
+        )
 
         # Parse: planner first (THOUGHT/ACTION split), then tools (JSON → tool_call)
         response = self.planner.parse(response)
@@ -69,7 +75,7 @@ class TinyAgent:
         """ACTION + OBSERVATION."""
         result = self.tools.execute(response)
         role, observation = self.tools.observation(result)
-        self.memory.add(role, observation, tool_call_id=response.tool_call.get("id"))
+        self.memory.add(
+            role, observation, tool_call_id=response.tool_call.get("id")
+        )
         self.trajectory.add(response, observation)
-
-

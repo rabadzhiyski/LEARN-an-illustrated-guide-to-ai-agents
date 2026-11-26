@@ -26,5 +26,6 @@ def today() -> str:
 
 def days_between(start: str, end: str) -> int:
     """Number of days between two ISO dates (YYYY-MM-DD)."""
-    return (datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)).days
-
+    return (
+        datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)
+    ).days

@@ -1,10 +1,4 @@
 from .agent import TinyAgent
-from .llm import LLM, EmbeddingModel, Response
-from .memory import LongTermMemory, Memory, SummarizationMemory, TrimmingMemory
-from .trajectory import Step, Trajectory
-from .tools import NativeTools, Skills, Tools
-from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
-from .multi_agent import SubAgent, total_tokens
 from .evaluation import (
     Benchmark,
     Evaluator,
@@ -13,7 +7,19 @@ from .evaluation import (
     programmatic,
     used_tools,
 )
-
+from .llm import LLM, EmbeddingModel, Response
+from .memory import (
+    LongTermMemory,
+    Memory,
+    MultimodalMemory,
+    SummarizationMemory,
+    TrimmingMemory,
+    encode_image,
+)
+from .multi_agent import SubAgent, total_tokens
+from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
+from .tools import NativeTools, Skills, Tools
+from .trajectory import Step, Trajectory
 
 __all__ = [
     "TinyAgent",
@@ -40,7 +46,7 @@ __all__ = [
     "programmatic",
     "used_tools",
     "SubAgent",
-    "total_tokens"
-] 
-
-
+    "total_tokens",
+    "MultimodalMemory",
+    "encode_image",
+]

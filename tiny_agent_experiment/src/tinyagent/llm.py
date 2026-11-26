@@ -73,6 +73,7 @@ class LLM:
             metadata=metadata,
         )
 
+
 class EmbeddingModel:
     """Turn text into a vector via an OpenAI-compatible /embeddings endpoint."""
 
@@ -92,4 +93,3 @@ class EmbeddingModel:
         with urllib.request.urlopen(request) as http_response:
             data = json.loads(http_response.read())
         return data["data"][0]["embedding"]
-

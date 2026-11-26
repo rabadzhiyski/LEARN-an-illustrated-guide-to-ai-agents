@@ -51,7 +51,9 @@ class Evaluator:
 
         runs = agent.trajectory.runs
         steps = runs[-1]["steps"] if runs else []
-        score = 0.0 if error else float(benchmark.scorer(prediction, example, steps))
+        score = (
+            0.0 if error else float(benchmark.scorer(prediction, example, steps))
+        )
 
         return {
             "task": example["task"][:60],

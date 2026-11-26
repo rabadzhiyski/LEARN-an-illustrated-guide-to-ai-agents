@@ -108,15 +108,17 @@ class Reflexion:
             f"{m['role']}: {m.get('content') or m.get('tool_calls')}"
             for m in memory.get_messages()[1:]  # skip the system prompt
         )
-        critique = self.llm.generate([
-            {
-                "role": "system",
-                "content": (
-                    "You review an AI agent's work. In at most 3 sentences: is it "
-                    "making progress toward the user's task? If not, what should "
-                    "it do differently?"
-                ),
-            },
-            {"role": "user", "content": transcript},
-        ])
+        critique = self.llm.generate(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "You review an AI agent's work. In at most 3 sentences: is it "
+                        "making progress toward the user's task? If not, what should "
+                        "it do differently?"
+                    ),
+                },
+                {"role": "user", "content": transcript},
+            ]
+        )
         memory.add("user", f"[Reflection] {critique.content}")

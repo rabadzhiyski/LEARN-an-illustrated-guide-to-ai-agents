@@ -1,3 +1,7 @@
+import base64
+import mimetypes
+from pathlib import Path
+
 from .llm import LLM, EmbeddingModel
 
 
@@ -8,27 +12,33 @@ class Memory:
         self.messages: list[dict] = []
 
     def add(
-          self,
-          role: str,
-          content: str,
-          tool_call: dict | None = None,
-          tool_call_id: str | None = None,
-          **kwargs,
-      ) -> None:
-          """Add a message to memory."""
-          message = {"role": role, "content": content}
-          if tool_call:
-              message["tool_calls"] = [tool_call]  # assistant asks for a tool
-          if tool_call_id:
-              message["tool_call_id"] = tool_call_id  # tool result answers that call
-          self.messages.append(message)
+        self,
+        role: str,
+        content: str | list,
+        tool_call: dict | None = None,
+        tool_call_id: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Add a message to memory."""
+        message = {"role": role, "content": content}
+        if tool_call:
+            message["tool_calls"] = [tool_call]  # assistant asks for a tool
+        if tool_call_id:
+            message["tool_call_id"] = (
+                tool_call_id  # tool result answers that call
+            )
+        self.messages.append(message)
 
     def get_messages(self) -> list[dict]:
-          """Return the messages to send to the LLM."""
-          return self.messages
+        """Return the messages to send to the LLM."""
+        return self.messages
 
 
-
+def encode_image(path: str | Path) -> str:
+    """Read a local image file into a base64 data URL."""
+    mime = mimetypes.guess_type(path)[0] or "image/png"
+    data = base64.b64encode(Path(path).read_bytes()).decode()
+    return f"data:{mime};base64,{data}"
 
 
 class TrimmingMemory(Memory):
@@ -42,7 +52,7 @@ class TrimmingMemory(Memory):
         super().add(role, content, **kwargs)
         system = [m for m in self.messages if m["role"] == "system"]
         turns = [m for m in self.messages if m["role"] != "system"]
-        self.messages = system + turns[-self.max_messages:]
+        self.messages = system + turns[-self.max_messages :]
 
 
 class SummarizationMemory(Memory):
@@ -103,3 +113,24 @@ class LongTermMemory(Memory):
         dot = sum(x * y for x, y in zip(a, b))
         norm = sum(x * x for x in a) ** 0.5 * sum(y * y for y in b) ** 0.5
         return dot / norm
+
+
+class MultimodalMemory(Memory):
+    """Memory whose user messages can carry an image next to the text."""
+
+    def add(
+        self,
+        role: str,
+        content: str | list,
+        image: str | Path | None = None,
+        **kwargs,
+    ) -> None:
+        if image:
+            url = str(image)
+            if not url.startswith(("http://", "https://", "data:")):
+                url = encode_image(url)  # a local file path
+            content = [
+                {"type": "image_url", "image_url": {"url": url}},
+                {"type": "text", "text": str(content)},
+            ]
+        super().add(role, content, **kwargs)

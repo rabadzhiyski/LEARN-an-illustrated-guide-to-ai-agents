@@ -21,7 +21,9 @@ def tool_to_schema(func: Callable, name: str, description: str = "") -> dict:
     """Build an OpenAI-style tool schema from a function's signature."""
     properties, required = {}, []
     for param_name, param in inspect.signature(func).parameters.items():
-        properties[param_name] = {"type": TYPE_MAP.get(param.annotation, "string")}
+        properties[param_name] = {
+            "type": TYPE_MAP.get(param.annotation, "string")
+        }
         if param.default is inspect.Parameter.empty:
             required.append(param_name)
 
@@ -152,10 +154,10 @@ class NativeTools(Tools):
         if isinstance(args, str):  # OpenAI spec: arguments is a JSON *string*
             args = json.loads(args) if args else {}
         tool_call = {
-              "tool": function["name"],
-              "kwargs": args,
-              "id": response.tool_call.get("id"),
-          }
+            "tool": function["name"],
+            "kwargs": args,
+            "id": response.tool_call.get("id"),
+        }
         return replace(response, tool_call=tool_call)
 
     def observation(self, result: Any) -> tuple[str, str]:
@@ -199,4 +201,3 @@ class Skills(NativeTools):
             "Some of your tools are skills: calling one returns detailed instructions "
             "for a type of task. Activate the matching skill before starting such a task.\n"
         )
-
