@@ -4,6 +4,15 @@ from .memory import LongTermMemory, Memory, SummarizationMemory, TrimmingMemory
 from .trajectory import Step, Trajectory
 from .tools import NativeTools, Skills, Tools
 from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
+from .evaluation import (
+    Benchmark,
+    Evaluator,
+    exact_choice,
+    make_judge,
+    programmatic,
+    used_tools,
+)
+
 
 __all__ = [
     "TinyAgent",
@@ -22,7 +31,13 @@ __all__ = [
     "NativeReAct",
     "PlanAndSolve",
     "ReAct",
-    "Reflexion"
+    "Reflexion",
+    "Benchmark",
+    "Evaluator",
+    "exact_choice",
+    "make_judge",
+    "programmatic",
+    "used_tools",
 ] 
 
 
