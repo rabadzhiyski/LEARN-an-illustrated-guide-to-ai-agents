@@ -111,7 +111,10 @@ To use a tool, write this JSON:
 
         # Human-in-the-loop for dangerous tools
         if name in self.requires_approval:
-            answer = input(f"Allow {name}({kwargs})? [y/N] ").strip().lower()
+            preview = str(kwargs)[
+                :120
+            ]  # NEW line: first 120 chars of the arguments
+            answer = input(f"Allow {name}({preview}...)? [y/N] ").strip().lower()
             if answer not in ("y", "yes"):
                 return f"Tool '{name}' was denied by the user."
 

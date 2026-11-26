@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Callable
 
 from .llm import LLM, Response
 from .memory import Memory
@@ -17,12 +18,16 @@ class TinyAgent:
         tools: Tools,
         planner: ReAct,
         reflector: Reflexion | None = None,
+        display: Callable | None = None,
     ) -> None:
         self.llm = llm
         self.memory = memory
         self.tools = tools
         self.planner = planner
         self.reflector = reflector
+        self.display = display or (
+            lambda event, data=None: None
+        )  # silent default
 
         self.trajectory = Trajectory()
 
@@ -52,6 +57,7 @@ class TinyAgent:
     def _step(self) -> str | None:
         """One iteration. Returns the answer when done, None to keep going."""
         # THOUGHT
+        self.display("thinking")
         response = self.llm.generate(
             self.memory.get_messages(), tools=self.tools.schemas
         )
@@ -62,9 +68,12 @@ class TinyAgent:
         # Parse: planner first (THOUGHT/ACTION split), then tools (JSON → tool_call)
         response = self.planner.parse(response)
         response = self.tools.parse(response)
+        if response.reasoning:
+            self.display("THOUGHT", response.reasoning)
 
         # ANSWER
         if self.tools.is_done(response):
+            self.display("ANSWER", response.content)
             self.trajectory.add(response)
             return response.content
 
@@ -73,9 +82,11 @@ class TinyAgent:
 
     def _execute_action(self, response: Response) -> None:
         """ACTION + OBSERVATION."""
+        self.display("ACTION", response.tool_call)
         result = self.tools.execute(response)
         role, observation = self.tools.observation(result)
         self.memory.add(
             role, observation, tool_call_id=response.tool_call.get("id")
         )
         self.trajectory.add(response, observation)
+        self.display("OBSERVATION", observation)

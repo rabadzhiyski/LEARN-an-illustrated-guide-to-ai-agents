@@ -21,6 +21,10 @@ from .planning import NativeReAct, PlanAndSolve, ReAct, Reflexion
 from .tools import NativeTools, Skills, Tools
 from .trajectory import Step, Trajectory
 
+from .code_tools import create_code_tools
+from .display import Display
+
+
 __all__ = [
     "TinyAgent",
     "LLM",
@@ -49,4 +53,6 @@ __all__ = [
     "total_tokens",
     "MultimodalMemory",
     "encode_image",
+    "create_code_tools",
+    "Display",
 ]
